@@ -1,0 +1,22 @@
+
+
+An input/output error occurred.
+Consult the following stack trace for details.
+java.nio.charset.MalformedInputException: Input length = 1
+	at java.base/java.nio.charset.CoderResult.throwException(CoderResult.java:279)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:405)
+	at java.base/sun.nio.cs.StreamDecoder.lockedRead(StreamDecoder.java:217)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:171)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:188)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:160)
+	at java.base/java.io.BufferedReader.implRead(BufferedReader.java:196)
+	at java.base/java.io.BufferedReader.read(BufferedReader.java:181)
+	at jdk.internal.opt/jdk.internal.opt.CommandLine$Tokenizer.<init>(CommandLine.java:145)
+	at jdk.internal.opt/jdk.internal.opt.CommandLine.loadCmdFileAndCloseReader(CommandLine.java:131)
+	at jdk.internal.opt/jdk.internal.opt.CommandLine.loadCmdFile(CommandLine.java:126)
+	at jdk.internal.opt/jdk.internal.opt.CommandLine.appendParsedCommandArgs(CommandLine.java:84)
+	at jdk.internal.opt/jdk.internal.opt.CommandLine.parse(CommandLine.java:115)
+	at jdk.compiler/com.sun.tools.javac.main.Main.compile(Main.java:224)
+	at jdk.compiler/com.sun.tools.javac.main.Main.compile(Main.java:178)
+	at jdk.compiler/com.sun.tools.javac.Main.compile(Main.java:64)
+	at jdk.compiler/com.sun.tools.javac.Main.main(Main.java:50)

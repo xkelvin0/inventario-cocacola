@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Lotes - Sistema de Inventario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet"/>
+    <style>
+        :root { --sidebar-width: 250px; --primary: #cc0000; --sidebar-bg: #1a0000; }
+        body { background: #f0f2f8; font-family: 'Segoe UI', sans-serif; }
+        .sidebar { width: var(--sidebar-width); min-height: 100vh; background: var(--sidebar-bg); position: fixed; top: 0; left: 0; z-index: 100; box-shadow: 4px 0 15px rgba(0,0,0,0.2); }
+        .sidebar-brand { background: var(--primary); padding: 20px; color: white; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+        .sidebar .nav-link { color: #a0aec0; padding: 12px 20px; transition: all 0.2s; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { background: #2d3348; color: white; border-left: 4px solid var(--primary); }
+        .sidebar .nav-section { color: #4a5568; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; padding: 16px 20px 6px; font-weight: 600; }
+        .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
+        .topbar { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.08); padding: 15px 25px; }
+        .page-content { padding: 25px; }
+        .card { border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.08); border-radius: 12px; }
+        .card-header { background: white; border-bottom: 1px solid #f0f2f8; border-radius: 12px 12px 0 0 !important; padding: 15px 20px; font-weight: 600; }
+        .btn-primary { background: var(--primary); border-color: var(--primary); }
+        .table th { background: #f8fafc; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; }
+    </style>
+</head>
+<body>
+<nav class="sidebar">
+    <div class="sidebar-brand"><i class="bi bi-box-seam-fill"></i><span>Coca-Cola Inv.</span></div>
+    <div class="nav-section">Principal</div>
+    <a th:href="@{/}" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a>
+    <div class="nav-section">Gestión</div>
+    <a th:href="@{/productos}" class="nav-link"><i class="bi bi-box-fill"></i> Productos</a>
+    <a th:href="@{/lotes}" class="nav-link active"><i class="bi bi-archive-fill"></i> Lotes</a>
+    <a th:href="@{/movimientos}" class="nav-link"><i class="bi bi-arrow-left-right"></i> Movimientos</a>
+    <div class="nav-section">Consultas</div>
+    <a th:href="@{/inventario}" class="nav-link"><i class="bi bi-clipboard-data-fill"></i> Inventario</a>
+    <a th:href="@{/inventario/reporte}" class="nav-link"><i class="bi bi-bar-chart-fill"></i> Reporte</a>
+</nav>
+<div class="main-content">
+    <div class="topbar d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-archive-fill text-danger"></i>
+            <span class="fw-semibold">Listado de Lotes</span>
+        </div>
+        <a th:href="@{/lotes/nuevo}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i>Nuevo Lote
+        </a>
+    </div>
+    <div class="page-content">
+        <div th:if="${exito}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill me-2"></i><span th:text="${exito}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div class="card">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">ID</th>
+                            <th>N° Lote</th>
+                            <th>Producto</th>
+                            <th>Cant. Inicial</th>
+                            <th>Vencimiento</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="lote : ${lotes}" 
+                            th:with="daysRemaining=${T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDate).now(), lote.fechaVencimiento)}">
+                            <td class="ps-4 text-muted" th:text="${lote.idLote}"></td>
+                            <td class="fw-bold text-primary" th:text="${lote.numeroLote}"></td>
+                            <td class="fw-semibold" th:text="${lote.nombreProducto}"></td>
+                            <td th:text="${lote.cantidadInicial}"></td>
+                            <td th:text="${lote.fechaVencimiento}"></td>
+                            <td>
+                                <span th:if="${daysRemaining < 0}" class="badge bg-danger p-2">
+                                    <i class="bi bi-exclamation-octagon-fill me-1"></i>¡VENCIDO!
+                                </span>
+                                <span th:if="${daysRemaining >= 0 and daysRemaining <= 30}" class="badge bg-warning text-dark p-2">
+                                    <i class="bi bi-alarm-fill me-1"></i>Vence en <span th:text="${daysRemaining}"></span> días
+                                </span>
+                                <span th:if="${daysRemaining > 30}" class="badge bg-success p-2">
+                                    <i class="bi bi-check-circle-fill me-1"></i>Vigente (<span th:text="${daysRemaining}"></span> d)
+                                </span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(lotes)}">
+                            <td colspan="6" class="text-center text-muted py-5">
+                                <i class="bi bi-archive d-block" style="font-size: 2rem;"></i>
+                                No hay lotes registrados.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
+
