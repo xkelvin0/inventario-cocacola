@@ -10,20 +10,22 @@
         :root {
             --sidebar-width: 250px;
             --sidebar-bg: #1a0000;
-            --sidebar-accent: #4f46e5;
+            --sidebar-accent: #cc0000;
             --sidebar-hover: #2d3348;
         }
-        body { background: #f0f2f8; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f0f2f8; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        
         .sidebar {
             width: var(--sidebar-width);
             min-height: 100vh;
             background: var(--sidebar-bg);
             position: fixed;
             top: 0; left: 0;
-            z-index: 100;
-            padding-top: 0;
+            z-index: 1050;
+            transition: all 0.3s ease;
             box-shadow: 4px 0 15px rgba(0,0,0,0.2);
         }
+        
         .sidebar-brand {
             background: var(--sidebar-accent);
             padding: 20px;
@@ -34,21 +36,23 @@
             align-items: center;
             gap: 10px;
         }
+        
         .sidebar .nav-link {
             color: #a0aec0;
             padding: 12px 20px;
-            border-radius: 0;
             transition: all 0.2s;
             display: flex;
             align-items: center;
             gap: 10px;
             font-size: 0.9rem;
         }
+        
         .sidebar .nav-link:hover, .sidebar .nav-link.active {
             background: var(--sidebar-hover);
             color: white;
             border-left: 4px solid var(--sidebar-accent);
         }
+        
         .sidebar .nav-section {
             color: #4a5568;
             font-size: 0.7rem;
@@ -57,32 +61,73 @@
             padding: 16px 20px 6px;
             font-weight: 600;
         }
+        
         .main-content {
             margin-left: var(--sidebar-width);
             min-height: 100vh;
+            transition: all 0.3s ease;
         }
+        
         .topbar {
             background: white;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             padding: 15px 25px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
-        .page-content { padding: 25px; }
-        .card { border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.08); border-radius: 12px; }
+        
+        .page-content { padding: 20px; }
+        
+        .sidebar-toggler {
+            display: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--sidebar-bg);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                left: calc(-1 * var(--sidebar-width));
+            }
+            .sidebar.show {
+                left: 0;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .sidebar-toggler {
+                display: block;
+            }
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 1040;
+            }
+            .overlay.show {
+                display: block;
+            }
+        }
+
+        .card { border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.08); border-radius: 12px; margin-bottom: 20px; }
         .card-header { background: white; border-bottom: 1px solid #f0f2f8; border-radius: 12px 12px 0 0 !important; padding: 15px 20px; font-weight: 600; }
-        .btn-primary { background: var(--sidebar-accent); border-color: var(--sidebar-accent); }
-        .btn-primary:hover { background: #4338ca; border-color: #4338ca; }
-        .alert { border-radius: 10px; }
-        .table th { background: #f8fafc; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; }
-        .badge { font-size: 0.75rem; }
+        .table-responsive { border-radius: 0 0 12px 12px; }
     </style>
     <th:block th:replace="${extraStyles}"></th:block>
 </head>
 <body>
+<!-- Overlay for mobile sidebar -->
+<div class="overlay" id="overlay"></div>
+
 <!-- Sidebar -->
-<nav class="sidebar">
+<nav class="sidebar" id="sidebar">
     <div class="sidebar-brand">
         <i class="bi bi-box-seam-fill"></i>
         <span>Coca-Cola Inv.</span>
@@ -113,17 +158,20 @@
 <!-- Main Content -->
 <div class="main-content">
     <div class="topbar">
-        <i class="bi bi-chevron-right text-muted"></i>
-        <span class="text-muted" th:text="${titulo ?: 'Dashboard'}">Página</span>
+        <div class="sidebar-toggler" id="sidebar-toggler">
+            <i class="bi bi-list"></i>
+        </div>
+        <i class="bi bi-chevron-right text-muted d-none d-md-block"></i>
+        <span class="text-muted fw-semibold" th:text="${titulo ?: 'Dashboard'}">Página</span>
     </div>
     <div class="page-content">
         <!-- Alertas globales -->
-        <div th:if="${exito}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <div th:if="${exito}" class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
             <i class="bi bi-check-circle-fill me-2"></i>
             <span th:text="${exito}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
             <span th:text="${error}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -135,6 +183,25 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggler = document.getElementById('sidebar-toggler');
+    const overlay = document.getElementById('overlay');
+
+    if (sidebarToggler) {
+        sidebarToggler.addEventListener('click', () => {
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        });
+    }
+
+    if (overlay) {
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            overlay.classList.remove('show');
+        });
+    }
+</script>
 <th:block th:replace="${extraScripts}"></th:block>
 </body>
 </html>

@@ -6,24 +6,12 @@
     <title>Reporte de Inventario - Sistema de Inventario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet"/>
-    <style>
-        :root { --sidebar-width: 250px; --primary: #cc0000; --sidebar-bg: #1a0000; }
-        body { background: #f0f2f8; font-family: 'Segoe UI', sans-serif; }
-        .sidebar { width: var(--sidebar-width); min-height: 100vh; background: var(--sidebar-bg); position: fixed; top: 0; left: 0; z-index: 100; box-shadow: 4px 0 15px rgba(0,0,0,0.2); }
-        .sidebar-brand { background: var(--primary); padding: 20px; color: white; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
-        .sidebar .nav-link { color: #a0aec0; padding: 12px 20px; transition: all 0.2s; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active { background: #2d3348; color: white; border-left: 4px solid var(--primary); }
-        .sidebar .nav-section { color: #4a5568; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; padding: 16px 20px 6px; font-weight: 600; }
-        .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
-        .topbar { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.08); padding: 15px 25px; }
-        .page-content { padding: 25px; }
-        .card { border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.08); border-radius: 12px; }
-        .card-header { background: white; border-bottom: 1px solid #f0f2f8; border-radius: 12px 12px 0 0 !important; padding: 15px 20px; font-weight: 600; }
-        .table th { background: #f8fafc; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; }
-    </style>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
 </head>
 <body>
-<nav class="sidebar">
+<div class="overlay" id="overlay"></div>
+
+<nav class="sidebar" id="sidebar">
     <div class="sidebar-brand"><i class="bi bi-box-seam-fill"></i><span>Coca-Cola Inv.</span></div>
     <div class="nav-section">Principal</div>
     <a th:href="@{/}" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a>
@@ -35,53 +23,56 @@
     <a th:href="@{/inventario}" class="nav-link"><i class="bi bi-clipboard-data-fill"></i> Inventario</a>
     <a th:href="@{/inventario/reporte}" class="nav-link active"><i class="bi bi-bar-chart-fill"></i> Reporte</a>
 </nav>
+
 <div class="main-content">
-    <div class="topbar d-flex align-items-center gap-2">
-        <i class="bi bi-bar-chart-fill text-danger"></i>
-        <span class="fw-semibold">Reporte Completo de Inventario</span>
+    <div class="topbar">
+        <div class="sidebar-toggler" id="sidebar-toggler"><i class="bi bi-list"></i></div>
+        <span class="text-muted fw-semibold">Reporte General</span>
     </div>
     <div class="page-content">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-bar-chart-fill me-2 text-danger"></i>Informe de Inventario</span>
-                <small class="text-muted">Reporte General de Inventario</small>
+                <span><i class="bi bi-bar-chart-fill me-2 text-danger"></i>Consolidado de Inventario</span>
+                <small class="text-muted d-none d-sm-inline">Informe de Movimientos y Stock</small>
             </div>
             <div class="card-body p-0">
                 <div th:if="${reporte != null}">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th class="ps-4">Producto</th>
-                                <th>Categoría</th>
-                                <th>Stock Actual</th>
-                                <th>Total Ingresos</th>
-                                <th>Total Salidas</th>
-                                <th>Lotes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="item : ${reporte}">
-                                <td class="ps-4 fw-semibold" th:text="${item.nombreProducto}"></td>
-                                <td th:text="${item.categoria}"></td>
-                                <td>
-                                    <span class="fw-bold" th:text="${item.stockActual}"></span>
-                                </td>
-                                <td>
-                                    <span class="text-success fw-semibold">
-                                        <i class="bi bi-arrow-down-circle-fill"></i>
-                                        <span th:text="${item.totalIngresos}"></span>
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="text-danger fw-semibold">
-                                        <i class="bi bi-arrow-up-circle-fill"></i>
-                                        <span th:text="${item.totalSalidas}"></span>
-                                    </span>
-                                </td>
-                                <td th:text="${item.cantidadLotes}"></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Producto</th>
+                                    <th class="d-none d-md-table-cell">Categoría</th>
+                                    <th>Stock</th>
+                                    <th>Ingresos</th>
+                                    <th>Salidas</th>
+                                    <th class="d-none d-sm-table-cell">Lotes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="item : ${reporte}">
+                                    <td class="ps-4 fw-semibold" th:text="${item.nombreProducto}"></td>
+                                    <td class="d-none d-md-table-cell" th:text="${item.categoria}"></td>
+                                    <td>
+                                        <span class="fw-bold" th:text="${item.stockActual}"></span>
+                                    </td>
+                                    <td>
+                                        <span class="text-success small fw-semibold">
+                                            <i class="bi bi-arrow-down-circle-fill"></i>
+                                            <span th:text="${item.totalIngresos}"></span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="text-danger small fw-semibold">
+                                            <i class="bi bi-arrow-up-circle-fill"></i>
+                                            <span th:text="${item.totalSalidas}"></span>
+                                        </span>
+                                    </td>
+                                    <td class="d-none d-sm-table-cell" th:text="${item.cantidadLotes}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div th:if="${reporte == null}" class="text-center text-muted py-5">
                     <i class="bi bi-bar-chart d-block" style="font-size: 2rem;"></i>
@@ -92,6 +83,7 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
 </body>
 </html>
 
