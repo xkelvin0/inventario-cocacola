@@ -4,7 +4,10 @@ import com.inventory.dto.ProductoDTO;
 import com.inventory.entity.Inventario;
 import com.inventory.entity.Producto;
 import com.inventory.exception.ResourceNotFoundException;
+import com.inventory.exception.BusinessException;
 import com.inventory.repository.InventarioRepository;
+import com.inventory.repository.LoteRepository;
+import com.inventory.repository.MovimientoRepository;
 import com.inventory.repository.ProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,12 @@ public class ProductoService {
 
     @Autowired
     private InventarioRepository inventarioRepository;
+
+    @Autowired
+    private LoteRepository loteRepository;
+
+    @Autowired
+    private MovimientoRepository movimientoRepository;
 
     /**
      * Obtener todos los productos
@@ -129,6 +138,17 @@ public class ProductoService {
         if (!productoRepository.existsById(id)) {
             throw new ResourceNotFoundException("Producto", id);
         }
+
+        // V-06: No permitir eliminar si hay lotes registrados
+        if (loteRepository.countByProductoIdProducto(id) > 0) {
+            throw new BusinessException("No se puede eliminar el producto porque tiene lotes asociados. Elimine primero los lotes.");
+        }
+
+        // No permitir eliminar si hay movimientos asociados (aunque estén ligados a lotes, por seguridad extra)
+        if (movimientoRepository.countByInventarioProductoIdProducto(id) > 0) {
+            throw new BusinessException("No se puede eliminar el producto porque tiene historial de movimientos registrado.");
+        }
+
         productoRepository.deleteById(id);
     }
 

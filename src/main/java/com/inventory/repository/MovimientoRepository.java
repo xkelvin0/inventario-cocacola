@@ -22,4 +22,8 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Integer>
 
     @Query("SELECT m.inventario.producto.nombre, COUNT(m) as total FROM Movimiento m GROUP BY m.inventario.producto.nombre ORDER BY total DESC")
     List<Object[]> findTopProductosMasMovidos();
+
+    Long countByInventarioProductoIdProducto(Integer idProducto);
+
+    boolean existsByLoteIdLote(Integer idLote);
 }

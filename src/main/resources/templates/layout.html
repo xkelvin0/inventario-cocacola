@@ -12,8 +12,37 @@
             --sidebar-bg: #1a0000;
             --sidebar-accent: #cc0000;
             --sidebar-hover: #2d3348;
+            --primary: #cc0000;
+            --bg-body: #f0f2f8;
+            --text-main: #2d3748;
+            --card-bg: #ffffff;
+            --topbar-bg: #ffffff;
         }
-        body { background: #f0f2f8; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        
+        /* Modos de Accesibilidad */
+        body.high-contrast {
+            --sidebar-bg: #000000;
+            --sidebar-accent: #ffff00;
+            --sidebar-hover: #333333;
+            --primary: #ffff00;
+            --bg-body: #000000;
+            --text-main: #ffffff;
+            --card-bg: #000000;
+            --topbar-bg: #000000;
+            color: #ffffff !important;
+        }
+
+        body.high-contrast .card, body.high-contrast .topbar {
+            border: 2px solid #ffffff !important;
+        }
+
+        body.high-contrast .nav-link { color: #ffffff !important; }
+        body.high-contrast .nav-link.active { background: #ffffff !important; color: #000000 !important; }
+
+        body.font-size-md { font-size: 1.15rem !important; }
+        body.font-size-lg { font-size: 1.3rem !important; }
+
+        body { background: var(--bg-body); font-family: 'Segoe UI', sans-serif; overflow-x: hidden; color: var(--text-main); }
         
         .sidebar {
             width: var(--sidebar-width);
@@ -69,7 +98,7 @@
         }
         
         .topbar {
-            background: white;
+            background: var(--topbar-bg);
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             padding: 15px 25px;
             display: flex;
@@ -116,8 +145,8 @@
             }
         }
 
-        .card { border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.08); border-radius: 12px; margin-bottom: 20px; }
-        .card-header { background: white; border-bottom: 1px solid #f0f2f8; border-radius: 12px 12px 0 0 !important; padding: 15px 20px; font-weight: 600; }
+        .card { border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.08); border-radius: 12px; margin-bottom: 20px; background: var(--card-bg); }
+        .card-header { background: var(--card-bg); border-bottom: 1px solid #f0f2f8; border-radius: 12px 12px 0 0 !important; padding: 15px 20px; font-weight: 600; }
         .table-responsive { border-radius: 0 0 12px 12px; }
     </style>
     <th:block th:replace="${extraStyles}"></th:block>
@@ -147,12 +176,23 @@
         <i class="bi bi-arrow-left-right"></i> Movimientos
     </a>
     <div class="nav-section">Consultas</div>
-    <a th:href="@{/inventario}" class="nav-link" th:classappend="${currentPage == 'inventario'} ? 'active'">
+    <a th:href="@{/inventario}" class="nav-link" th:classappend="${currentPage == 'inventario'} ? 'active'" aria-label="Ir a Inventario">
         <i class="bi bi-clipboard-data-fill"></i> Inventario
     </a>
-    <a th:href="@{/inventario/reporte}" class="nav-link" th:classappend="${currentPage == 'reporte'} ? 'active'">
+    <a th:href="@{/inventario/reporte}" class="nav-link" th:classappend="${currentPage == 'reporte'} ? 'active'" aria-label="Ir a Reporte">
         <i class="bi bi-bar-chart-fill"></i> Reporte
     </a>
+    <div class="nav-section">Accesibilidad</div>
+    <div class="px-3 pb-3">
+        <button class="btn btn-sm btn-outline-light w-100 mb-2" id="toggle-contrast" aria-label="Alternar alto contraste">
+            <i class="bi bi-circle-half"></i> Alto Contraste
+        </button>
+        <div class="d-flex gap-1">
+            <button class="btn btn-sm btn-outline-light flex-grow-1" id="font-sm" aria-label="Tamaño de fuente pequeño">A</button>
+            <button class="btn btn-sm btn-outline-light flex-grow-1" id="font-md" aria-label="Tamaño de fuente mediano">A+</button>
+            <button class="btn btn-sm btn-outline-light flex-grow-1" id="font-lg" aria-label="Tamaño de fuente grande">A++</button>
+        </div>
+    </div>
 </nav>
 
 <!-- Main Content -->
@@ -188,10 +228,12 @@
     const sidebarToggler = document.getElementById('sidebar-toggler');
     const overlay = document.getElementById('overlay');
 
+    // Sidebar Logic
     if (sidebarToggler) {
         sidebarToggler.addEventListener('click', () => {
             sidebar.classList.toggle('show');
             overlay.classList.toggle('show');
+            sidebarToggler.setAttribute('aria-expanded', sidebar.classList.contains('show'));
         });
     }
 
@@ -199,8 +241,38 @@
         overlay.addEventListener('click', () => {
             sidebar.classList.remove('show');
             overlay.classList.remove('show');
+            sidebarToggler.setAttribute('aria-expanded', 'false');
         });
     }
+
+    // Accessibility Logic
+    const body = document.body;
+    const btnContrast = document.getElementById('toggle-contrast');
+    const btnSm = document.getElementById('font-sm');
+    const btnMd = document.getElementById('font-md');
+    const btnLg = document.getElementById('font-lg');
+
+    // Persistence
+    const savedContrast = localStorage.getItem('accessibility-contrast');
+    const savedFontSize = localStorage.getItem('accessibility-font');
+
+    if (savedContrast === 'true') body.classList.add('high-contrast');
+    if (savedFontSize) body.classList.add(savedFontSize);
+
+    btnContrast?.addEventListener('click', () => {
+        body.classList.toggle('high-contrast');
+        localStorage.setItem('accessibility-contrast', body.classList.contains('high-contrast'));
+    });
+
+    const setFontSize = (size) => {
+        body.classList.remove('font-size-md', 'font-size-lg');
+        if (size) body.classList.add(size);
+        localStorage.setItem('accessibility-font', size);
+    };
+
+    btnSm?.addEventListener('click', () => setFontSize(''));
+    btnMd?.addEventListener('click', () => setFontSize('font-size-md'));
+    btnLg?.addEventListener('click', () => setFontSize('font-size-lg'));
 </script>
 <th:block th:replace="${extraScripts}"></th:block>
 </body>

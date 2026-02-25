@@ -40,7 +40,7 @@ public class Lote {
     @JsonIgnore
     private Producto producto;
 
-    @OneToMany(mappedBy = "lote", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "lote", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
     @JsonIgnore
     private List<Movimiento> movimientos = new ArrayList<>();
 

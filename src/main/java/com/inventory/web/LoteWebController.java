@@ -47,4 +47,15 @@ public class LoteWebController {
         }
         return "redirect:/lotes";
     }
+
+    @PostMapping("/eliminar/{id}")
+    public String eliminar(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            loteService.eliminar(id);
+            redirectAttributes.addFlashAttribute("exito", "Lote eliminado correctamente.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al eliminar: " + e.getMessage());
+        }
+        return "redirect:/lotes";
+    }
 }

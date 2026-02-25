@@ -4,7 +4,9 @@ import com.inventory.dto.LoteDTO;
 import com.inventory.entity.Lote;
 import com.inventory.entity.Producto;
 import com.inventory.exception.ResourceNotFoundException;
+import com.inventory.exception.BusinessException;
 import com.inventory.repository.LoteRepository;
+import com.inventory.repository.MovimientoRepository;
 import com.inventory.repository.ProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,9 @@ public class LoteService {
 
     @Autowired
     private ProductoRepository productoRepository;
+
+    @Autowired
+    private MovimientoRepository movimientoRepository;
 
     /**
      * Obtener todos los lotes
@@ -77,6 +82,15 @@ public class LoteService {
         if (!loteRepository.existsById(id)) {
             throw new ResourceNotFoundException("Lote", id);
         }
+
+        // V-06.1: No permitir eliminar si el lote tiene movimientos (historial)
+        // Usamos countByLoteIdLote que debería existir o lo agregamos al repo de movimientos
+        // Pero ya agregamos countByInventarioProductoIdProducto antes. 
+        // Vamos a verificar si MovimientoRepository tiene lo que necesitamos para Lote.
+        if (movimientoRepository.existsByLoteIdLote(id)) {
+            throw new BusinessException("No se puede eliminar el lote porque tiene historial de movimientos registrado.");
+        }
+
         loteRepository.deleteById(id);
     }
 

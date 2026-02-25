@@ -4,13 +4,63 @@
     --sidebar-accent: #cc0000;
     --sidebar-hover: #2d3348;
     --primary: #cc0000;
+    --bg-body: #f0f2f8;
+    --text-main: #2d3748;
+    --card-bg: #ffffff;
+    --topbar-bg: #ffffff;
 }
 
+/* Modos de Accesibilidad */
+body.high-contrast {
+    --sidebar-bg: #000000;
+    --sidebar-accent: #ffff00;
+    --sidebar-hover: #333333;
+    --primary: #ffff00;
+    --bg-body: #000000;
+    --text-main: #ffffff;
+    --card-bg: #000000;
+    --topbar-bg: #000000;
+    color: #ffffff !important;
+}
+
+body.high-contrast .card, body.high-contrast .topbar {
+    border: 2px solid #ffffff !important;
+}
+
+body.high-contrast .nav-link { color: #ffffff !important; }
+body.high-contrast .nav-link.active { background: #ffffff !important; color: #000000 !important; }
+body.high-contrast .sidebar-brand { background: var(--sidebar-accent) !important; color: #000000 !important; }
+
+body.font-size-md { font-size: 1.15rem !important; }
+body.font-size-lg { font-size: 1.3rem !important; }
+
 body {
-    background: #f0f2f8;
+    background: var(--bg-body);
     font-family: 'Segoe UI', sans-serif;
     overflow-x: hidden;
+    color: var(--text-main);
     -webkit-tap-highlight-color: transparent;
+}
+
+/* Accesibilidad: Foco y Skip Link */
+:focus {
+    outline: 3px solid #ffcc00 !important;
+    outline-offset: 2px;
+}
+
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: #cc0000;
+    color: white;
+    padding: 8px;
+    z-index: 2000;
+    transition: top 0.3s;
+}
+
+.skip-link:focus {
+    top: 0;
 }
 
 .text-truncate-cell {
@@ -75,7 +125,7 @@ body {
 }
 
 .topbar {
-    background: white;
+    background: var(--topbar-bg);
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     padding: 15px 25px;
     display: flex;
@@ -109,10 +159,11 @@ body {
     box-shadow: 0 2px 15px rgba(0,0,0,0.08);
     border-radius: 12px;
     margin-bottom: 20px;
+    background: var(--card-bg);
 }
 
 .card-header {
-    background: white;
+    background: var(--card-bg);
     border-bottom: 1px solid #f0f2f8;
     border-radius: 12px 12px 0 0 !important;
     padding: 15px 20px;

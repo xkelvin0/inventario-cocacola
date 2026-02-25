@@ -51,7 +51,7 @@ public class Producto {
         fechaCreacion = new java.util.Date();
     }
 
-    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "producto", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
     private List<Lote> lotes = new ArrayList<>();
 
     @OneToOne(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
